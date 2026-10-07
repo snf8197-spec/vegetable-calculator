@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الخضار والفواكه وإدارة التجزئة</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-light: #4caf50;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 12px;
+        }
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+            background: #fafafa;
+        }
+        input:focus {
+            border-color: var(--primary-light);
+            outline: none;
+            background: #fff;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        .results {
+            margin-top: 25px;
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 5px solid var(--primary-color);
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+        }
+        .result-item:last-child {
+            margin-bottom: 0;
+            font-weight: bold;
+            color: #1b5e20;
+            border-top: 1px dashed #c8e6c9;
+            padding-top: 8px;
+        }
+        .value {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>حاسبة الخضار والفواكه الذكية</h2>
+    
+    <div class="box">
+        <div class="form-group">
+            <label for="costPrice">سعر الشراء الإجمالي للكمية (ريال):</label>
+            <input type="number" id="costPrice" placeholder="مثال: 100" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="totalQuantity">الكمية الإجمالية (كيلو / صندوق):</label>
+            <input type="number" id="totalQuantity" placeholder="مثال: 50" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="wastePercentage">نسبة الهدر أو التالف المتوقعة (%):</label>
+            <input type="number" id="wastePercentage" placeholder="مثال: 10" value="10" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="profitMargin">هامش الربح المطلوب (%):</label>
+            <input type="number" id="profitMargin" placeholder="مثال: 25" value="25" step="0.01">
+        </div>
+
+        <button onclick="calculatePrice()">احسب سعر البيع والأرباح</button>
+    </div>
+
+    <div class="results" id="resultsBox" style="display:none;">
+        <div class="result-item">
+            <span>التكلفة الفعلية لكل وحدة (بعد الهدر):</span>
+            <span class="value" id="resCostPerUnit">0.00 ريال</span>
+        </div>
+        <div class="result-item">
+            <span>سعر البيع المقترح للوحدة (شامل الربح):</span>
+            <span class="value" id="resSellingPrice">0.00 ريال</span>
+        </div>
+        <div class="result-item">
+            <span>إجمالي الإيرادات المتوقعة:</span>
+            <span class="value" id="resTotalRevenue">0.00 ريال</span>
+        </div>
+        <div class="result-item">
+            <span>صافي الربح المتوقع:</span>
+            <span class="value" id="resNetProfit">0.00 ريال</span>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculatePrice() {
+    let cost = parseFloat(document.getElementById('costPrice').value);
+    let qty = parseFloat(document.getElementById('totalQuantity').value);
+    let waste = parseFloat(document.getElementById('wastePercentage').value) || 0;
+    let profit = parseFloat(document.getElementById('profitMargin').value) || 0;
+
+    if (isNaN(cost) || isNaN(qty) || qty <= 0 || cost <= 0) {
+        alert('الرجاء إدخال أرقام صحيحة وموجبة لسعر الشراء والكمية.');
+        return;
+    }
+
+    // حساب الكمية الفعالة بعد خصم نسبة الهدر والتالف
+    let effectiveQty = qty * (1 - (waste / 100));
+    if (effectiveQty <= 0) {
+        alert('نسبة الهدر عالية جداً ولا توجد كمية قابلة للبيع!');
+        return;
+    }
+
+    // التكلفة الفعلية لكل وحدة صالحة للبيع
+    let costPerUnit = cost / effectiveQty;
+
+    // حساب سعر البيع بناءً على هامش الربح المطلوب
+    let sellingPrice = costPerUnit / (1 - (profit / 100));
+
+    // إجمالي الإيرادات وصافي الربح
+    let totalRevenue = sellingPrice * effectiveQty;
+    let netProfit = totalRevenue - cost;
+
+    // عرض النتيجة
+    document.getElementById('resCostPerUnit').innerText = costPerUnit.toFixed(2) + ' ريال';
+    document.getElementById('resSellingPrice').innerText = sellingPrice.toFixed(2) + ' ريال';
+    document.getElementById('resTotalRevenue').innerText = totalRevenue.toFixed(2) + ' ريال';
+    document.getElementById('resNetProfit').innerText = netProfit.toFixed(2) + ' ريال';
+
+    document.getElementById('resultsBox').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
